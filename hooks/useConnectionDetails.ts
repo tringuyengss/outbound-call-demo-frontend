@@ -17,7 +17,7 @@ export default function useConnectionDetails(appConfig: AppConfig) {
 
   const [connectionDetails, setConnectionDetails] = useState<ConnectionDetails | null>(null);
 
-  const fetchConnectionDetails = useCallback(async (phoneNumber?: string) => {
+  const fetchConnectionDetails = useCallback(async () => {
     setConnectionDetails(null);
     const url = new URL(
       process.env.NEXT_PUBLIC_CONN_DETAILS_ENDPOINT ?? '/api/connection-details',
@@ -38,7 +38,6 @@ export default function useConnectionDetails(appConfig: AppConfig) {
                 agents: [{ agent_name: appConfig.agentName }],
               }
             : undefined,
-          phoneNumber,
         }),
       });
       data = await res.json();
@@ -71,16 +70,13 @@ export default function useConnectionDetails(appConfig: AppConfig) {
     return expiresAt >= now;
   }, [connectionDetails?.participantToken]);
 
-  const existingOrRefreshConnectionDetails = useCallback(
-    async (phoneNumber?: string) => {
-      if (isConnectionDetailsExpired() || !connectionDetails || phoneNumber) {
-        return fetchConnectionDetails(phoneNumber);
-      } else {
-        return connectionDetails;
-      }
-    },
-    [connectionDetails, fetchConnectionDetails, isConnectionDetailsExpired]
-  );
+  const existingOrRefreshConnectionDetails = useCallback(async () => {
+    if (isConnectionDetailsExpired() || !connectionDetails) {
+      return fetchConnectionDetails();
+    } else {
+      return connectionDetails;
+    }
+  }, [connectionDetails, fetchConnectionDetails, isConnectionDetailsExpired]);
 
   return {
     connectionDetails,

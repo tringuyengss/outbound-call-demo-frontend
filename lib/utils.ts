@@ -75,3 +75,9 @@ export const getAppConfig = cache(async (headers: Headers): Promise<AppConfig> =
 
   return APP_CONFIG_DEFAULTS;
 });
+
+export function generateRandomString(length = 10): string {
+  return Math.random()
+    .toString(36)
+    .slice(2, 2 + length);
+}

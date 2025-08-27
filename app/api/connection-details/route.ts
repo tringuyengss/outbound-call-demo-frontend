@@ -32,7 +32,6 @@ export async function POST(req: Request) {
     // Parse agent configuration from request body
     const body = await req.json();
     const agentName: string = body?.room_config?.agents?.[0]?.agent_name;
-    const phoneNumber: string = body?.phoneNumber;
 
     // Generate participant token
     const participantName = 'user';
@@ -43,7 +42,6 @@ export async function POST(req: Request) {
       {
         identity: participantIdentity,
         name: participantName,
-        metadata: JSON.stringify({ phoneNumber }),
       },
       roomName,
       agentName

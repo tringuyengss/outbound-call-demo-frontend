@@ -1,28 +1,38 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
+import { SpinnerIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { Input } from './ui/input';
 
 interface WelcomeProps {
-  disabled: boolean;
   startButtonText: string;
-  onStartCall: (phoneNumber: string) => void;
 }
 
-export const Welcome = ({
-  disabled,
-  startButtonText,
-  onStartCall,
-  ref,
-}: React.ComponentProps<'div'> & WelcomeProps) => {
+export const Welcome = ({ startButtonText, ref }: React.ComponentProps<'div'> & WelcomeProps) => {
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleStartCall = useCallback(async (phoneNumber: string) => {
+    const res = await fetch('/api/dispatch', {
+      method: 'POST',
+      body: JSON.stringify({ phoneNumber }),
+    });
+    const data = await res.json();
+    console.log(data);
+  }, []);
+
+  const handleOnClick = useCallback(() => {
+    if (phoneNumber) {
+      setIsLoading(true);
+      handleStartCall(phoneNumber);
+    }
+  }, [phoneNumber, handleStartCall]);
 
   return (
     <section
       ref={ref}
-      inert={disabled}
       className={cn(
-        'bg-background fixed inset-0 mx-auto flex h-svh flex-col items-center justify-center text-center',
-        disabled ? 'z-10' : 'z-20'
+        'bg-background fixed inset-0 mx-auto flex h-svh flex-col items-center justify-center text-center'
       )}
     >
       <svg
@@ -39,25 +49,29 @@ export const Welcome = ({
         />
       </svg>
 
-      <input
-        type="text"
-        className="rounded-md border border-gray-300 px-4 py-2"
+      <p className="text-fg1 max-w-prose pt-1 leading-6 font-medium">
+        Call a phone number with your voice AI agent
+      </p>
+
+      <Input
+        type="tel"
+        className="mt-4 w-72 py-4"
         value={phoneNumber}
-        placeholder="Enter the phone number to call"
+        placeholder="Phone number e.g. +81xxx"
         onChange={(e) => setPhoneNumber(e.target.value)}
       />
 
-      <p className="text-fg1 max-w-prose pt-1 leading-6 font-medium">
-        Chat live with your voice AI agent
-      </p>
       <Button
         variant="primary"
         size="lg"
-        onClick={() => onStartCall(phoneNumber)}
+        onClick={handleOnClick}
         className="mt-6 w-64 font-mono"
+        disabled={isLoading}
       >
-        {startButtonText}
+        {isLoading && <SpinnerIcon className="animate-spin" />}
+        {isLoading ? 'Calling...' : startButtonText}
       </Button>
+
       <footer className="fixed bottom-5 left-0 z-20 flex w-full items-center justify-center">
         <p className="text-fg1 max-w-prose pt-1 text-xs leading-5 font-normal text-pretty md:text-sm">
           Need help getting set up? Check out the{' '}
