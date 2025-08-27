@@ -23,14 +23,18 @@ export async function POST(req: Request) {
     const phoneNumber: string = body?.phoneNumber;
     console.log('🚀 ~ POST ~ phoneNumber:', phoneNumber);
 
-    await createExplicitDispatch({
+    const dispatch = await createExplicitDispatch({
       apiKey: API_KEY,
       apiSecret: API_SECRET,
       livekitUrl: LIVEKIT_URL,
       phoneNumber,
     });
 
-    return NextResponse.json({ message: 'Dispatch created' });
+    return NextResponse.json({
+      message: 'Dispatch created',
+      roomName: dispatch.room,
+      dispatchId: dispatch.id,
+    });
   } catch (error) {
     if (error instanceof Error) {
       console.error(error);
@@ -59,4 +63,6 @@ async function createExplicitDispatch({
     metadata: phoneNumber,
   });
   console.log('created dispatch', dispatch);
+
+  return dispatch;
 }

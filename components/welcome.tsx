@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { SpinnerIcon } from '@phosphor-icons/react';
+import { PhoneIcon, PhoneSlashIcon, SpinnerIcon } from '@phosphor-icons/react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Input } from './ui/input';
@@ -11,22 +11,34 @@ interface WelcomeProps {
 export const Welcome = ({ startButtonText, ref }: React.ComponentProps<'div'> & WelcomeProps) => {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [callStatus, setCallStatus] = useState<{ roomName: string; dispatchId: string } | null>(
+    null
+  );
 
   const handleStartCall = useCallback(async (phoneNumber: string) => {
+    setIsLoading(true);
     const res = await fetch('/api/dispatch', {
       method: 'POST',
       body: JSON.stringify({ phoneNumber }),
     });
+    setIsLoading(false);
     const data = await res.json();
-    console.log(data);
+    setCallStatus({
+      roomName: data.roomName,
+      dispatchId: data.dispatchId,
+    });
   }, []);
 
   const handleOnClick = useCallback(() => {
     if (phoneNumber) {
-      setIsLoading(true);
       handleStartCall(phoneNumber);
     }
   }, [phoneNumber, handleStartCall]);
+
+  const handleEndCall = useCallback(() => {
+    setPhoneNumber('');
+    setCallStatus(null);
+  }, []);
 
   return (
     <section
@@ -53,24 +65,56 @@ export const Welcome = ({ startButtonText, ref }: React.ComponentProps<'div'> & 
         Call a phone number with your voice AI agent
       </p>
 
-      <Input
-        type="tel"
-        className="mt-4 w-72 py-4"
-        value={phoneNumber}
-        placeholder="Phone number e.g. +81xxx"
-        onChange={(e) => setPhoneNumber(e.target.value)}
-      />
+      {/* Call Status Display */}
+      {callStatus && (
+        <div className="bg-muted mt-4 rounded-lg border p-4">
+          <div className="mb-2 flex items-center justify-center space-x-2">
+            <PhoneIcon className={cn('size-5 text-green-500')} />
+            <span className="font-medium">Calling...</span>
+          </div>
+          <div className="muted-foreground space-y-1 text-sm">
+            <p>Room: {callStatus.roomName}</p>
+            <p>Dispatch ID: {callStatus.dispatchId}</p>
+          </div>
+        </div>
+      )}
 
-      <Button
-        variant="primary"
-        size="lg"
-        onClick={handleOnClick}
-        className="mt-6 w-64 font-mono"
-        disabled={isLoading}
-      >
-        {isLoading && <SpinnerIcon className="animate-spin" />}
-        {isLoading ? 'Calling...' : startButtonText}
-      </Button>
+      {/* Phone Number Input - Only show when not in a call */}
+      {!callStatus && (
+        <>
+          <Input
+            type="tel"
+            className="mt-4 w-72 py-4"
+            value={phoneNumber}
+            placeholder="Phone number e.g. +81xxx"
+            onChange={(e) => setPhoneNumber(e.target.value)}
+          />
+
+          <Button
+            variant="primary"
+            size="lg"
+            onClick={handleOnClick}
+            className="mt-6 w-64 font-mono"
+            disabled={isLoading}
+          >
+            {isLoading && <SpinnerIcon className="animate-spin" />}
+            {isLoading ? 'Calling...' : startButtonText}
+          </Button>
+        </>
+      )}
+
+      {/* End Call Button - Only show when in a call */}
+      {callStatus && (
+        <Button
+          variant="destructive"
+          size="lg"
+          onClick={handleEndCall}
+          className="mt-6 w-64 font-mono"
+        >
+          <PhoneSlashIcon className="mr-2 size-5" />
+          End Call
+        </Button>
+      )}
 
       <footer className="fixed bottom-5 left-0 z-20 flex w-full items-center justify-center">
         <p className="text-fg1 max-w-prose pt-1 text-xs leading-5 font-normal text-pretty md:text-sm">
