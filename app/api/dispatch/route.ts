@@ -55,7 +55,7 @@ async function createExplicitDispatch({
   phoneNumber: string;
 }) {
   const roomName = `room-${generateRandomString()}`;
-  const agentName = 'outbound-caller';
+  const agentName = 'onbridge-outbound-caller';
 
   const agentDispatchClient = new AgentDispatchClient(livekitUrl, apiKey, apiSecret);
 
