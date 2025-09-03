@@ -55,7 +55,7 @@ async function createExplicitDispatch({
   phoneNumber: string;
 }) {
   const roomName = `room-${generateRandomString()}`;
-  const agentName = "realtime-agent";
+  const agentName = 'realtime-agent';
 
   const agentDispatchClient = new AgentDispatchClient(livekitUrl, apiKey, apiSecret);
 
