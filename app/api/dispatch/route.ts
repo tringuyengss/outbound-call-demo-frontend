@@ -5,7 +5,6 @@ import { generateRandomString } from '@/lib/utils';
 const API_KEY = process.env.LIVEKIT_API_KEY;
 const API_SECRET = process.env.LIVEKIT_API_SECRET;
 const LIVEKIT_URL = process.env.LIVEKIT_URL;
-const AGENT_NAME = process.env.LIVEKIT_AGENT_NAME || 'outbound-caller';
 
 export async function POST(req: Request) {
   try {
@@ -56,7 +55,7 @@ async function createExplicitDispatch({
   phoneNumber: string;
 }) {
   const roomName = `room-${generateRandomString()}`;
-  const agentName = AGENT_NAME;
+  const agentName = "outbound-caller";
 
   const agentDispatchClient = new AgentDispatchClient(livekitUrl, apiKey, apiSecret);
 
